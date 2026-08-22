@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>단계별 경유지 안내</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
+        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: #ffffff; width: 100%; max-width: 420px; padding: 30px 24px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        h1 { font-size: 1.4rem; color: #111; margin-bottom: 20px; text-align: center; }
+        
+        .input-group { display: flex; gap: 8px; margin-bottom: 24px; }
+        input { flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; }
+        input:focus { border-color: #007bff; }
+        
+        .btn { padding: 12px 18px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .btn:hover { background-color: #0056b3; }
+        .btn-next { width: 100%; margin-top: 20px; background-color: #28a745; }
+        .btn-next:hover { background-color: #218838; }
+
+        .result-box { display: none; margin-top: 10px; }
+        .user-name { font-size: 1.2rem; font-weight: bold; color: #007bff; margin-bottom: 20px; text-align: center; }
+        
+        .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e0e0e0; margin-left: 10px; }
+        .step { position: relative; margin-bottom: 20px; display: none; } /* 기본적으로 숨김 처리 */
+        .step.active { display: block; animation: fadeIn 0.4s ease-in-out; } /* 활성화되면 나타남 */
+        
+        .step::before { content: ''; position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #007bff; }
+        .step.destination::before { background: #28a745; width: 12px; height: 12px; left: -27px; }
+        
+        .label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 2px; }
+        .value { font-size: 1.1rem; font-weight: 600; color: #222; }
+        .destination .value { color: #28a745; font-size: 1.2rem; }
+        
+        .error-msg { color: #dc3545; text-align: center; font-size: 0.95rem; display: none; margin-top: 10px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>🚩 나의 경유지 찾기</h1>
+    
+    <div class="input-group" id="searchArea">
+        <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 홍길동)">
+        <button class="btn" onclick="startRoute()">조회</button>
+    </div>
+
+    <div id="errorMsg" class="error-msg">이름을 입력해 주세요.</div>
+
+    <div id="resultBox" class="result-box">
+        <div id="userNameDisplay" class="user-name"></div>
+        
+        <div class="timeline">
+            <div id="step1" class="step">
+                <span class="label">1차 경유지</span>
+                <span id="p1" class="value"></span>
+            </div>
+            <div id="step2" class="step">
+                <span class="label">2차 경유지</span>
+                <span id="p2" class="value"></span>
+            </div>
+            <div id="step3" class="step">
+                <span class="label">3차 경유지</span>
+                <span id="p3" class="value"></span>
+            </div>
+            <div id="step4" class="step destination">
+                <span class="label">최종 목적지</span>
+                <span id="dest" class="value"></span>
+            </div>
+        </div>
+
+        <button id="nextBtn" class="btn btn-next" onclick="showNextStep()">다음 장소 확인하기 👉</button>
+    </div>
+</div>
+
+<script>
+    // 1. 특정 참가자 지정 데이터
+    const fixedParticipants = {
+        "홍길동": { p1: "본관 로비", p2: "중앙 도서관", p3: "체육관", dest: "학생회관 강당" }
+    };
+
+    // 2. 무작위 배정용 전체 경유지 목록
+    const waypointsPool = [
+        "본관 로비", "중앙 도서관", "학생식당", 
+        "체육관", "학생회관 2층", "인문관 쉼터", 
+        "시계탑 광장", "야외 음악당"
+    ];
+
+    // 3. 공통 최종 목적지
+    const finalDestination = "학생회관 강당";
+
+    // 현재 열람 중인 단계 상태 값 (1 ~ 4)
+    let currentStep = 1;
+
+    function getRandomItems(arr, count) {
+        const shuffled = [...arr].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
+
+    function startRoute() {
+        const name = document.getElementById("nameInput").value.trim();
+        const resultBox = document.getElementById("resultBox");
+        const errorMsg = document.getElementById("errorMsg");
+
+        if (!name) {
+            errorMsg.textContent = "이름을 입력해 주세요.";
+            errorMsg.style.display = "block";
+            resultBox.style.display = "none";
+            return;
+        }
+
+        let routeData = {};
+
+        if (fixedParticipants[name]) {
+            routeData = fixedParticipants[name];
+        } else {
+            const randomWaypoints = getRandomItems(waypointsPool, 3);
+            routeData = {
+                p1: randomWaypoints[0],
+                p2: randomWaypoints[1],
+                p3: randomWaypoints[2],
+                dest: finalDestination
+            };
+        }
+
+        // 데이터 채우기
+        document.getElementById("userNameDisplay").textContent = `[ ${name} ] 님의 이동 경로`;
+        document.getElementById("p1").textContent = routeData.p1;
+        document.getElementById("p2").textContent = routeData.p2;
+        document.getElementById("p3").textContent = routeData.p3;
+        document.getElementById("dest").textContent = routeData.dest;
+
+        // 단계 초기화 (모든 스텝 숨기고 1단계만 표시)
+        currentStep = 1;
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`step${i}`).classList.remove("active");
+        }
+        document.getElementById("step1").classList.add("active");
+
+        // 버튼 상태 초기화
+        const nextBtn = document.getElementById("nextBtn");
+        nextBtn.textContent = "다음 장소 확인하기 👉";
+        nextBtn.style.display = "block";
+
+        errorMsg.style.display = "none";
+        resultBox.style.display = "block";
+    }
+
+    function showNextStep() {
+        if (currentStep < 4) {
+            currentStep++;
+            document.getElementById(`step${currentStep}`).classList.add("active");
+
+            // 마지막 목적지 단계에 도달했을 때
+            if (currentStep === 4) {
+                const nextBtn = document.getElementById("nextBtn");
+                nextBtn.textContent = "🎉 목적지 도착!";
+                nextBtn.style.backgroundColor = "#6c757d";
+                nextBtn.onclick = null; // 더 이상 클릭 안 되게 처리
+            }
+        }
+    }
+
+    // 엔터키 지원
+    document.getElementById("nameInput").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") startRoute();
+    });
+</script>
+
+</body>
+</html>

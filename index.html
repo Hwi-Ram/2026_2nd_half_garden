@@ -47,7 +47,7 @@
     <h1>🚩 나의 경유지 찾기</h1>
     
     <div class="input-group" id="searchArea">
-        <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 홍길동)">
+        <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 김태현)">
         <button class="btn" onclick="startRoute()">조회</button>
     </div>
 
@@ -58,15 +58,15 @@
         
         <div class="timeline">
             <div id="step1" class="step">
-                <span class="label">1차 경유지</span>
+                <span class="label">1차 목적지</span>
                 <span id="p1" class="value"></span>
             </div>
             <div id="step2" class="step">
-                <span class="label">2차 경유지</span>
+                <span class="label">2차 목적지</span>
                 <span id="p2" class="value"></span>
             </div>
             <div id="step3" class="step">
-                <span class="label">3차 경유지</span>
+                <span class="label">3차 목적지</span>
                 <span id="p3" class="value"></span>
             </div>
             <div id="step4" class="step destination">
@@ -87,13 +87,12 @@
 
     // 2. 무작위 배정용 전체 경유지 목록
     const waypointsPool = [
-        "본관 로비", "중앙 도서관", "학생식당", 
-        "체육관", "학생회관 2층", "인문관 쉼터", 
-        "시계탑 광장", "야외 음악당"
+        "예루살렘 성전", "바울성전", "안디옥 성전", 
+        "대운동장", "1청년부실", "2청년부실"
     ];
 
     // 3. 공통 최종 목적지
-    const finalDestination = "학생회관 강당";
+    const finalDestination = "베들레헴 성전";
 
     // 현재 열람 중인 단계 상태 값 (1 ~ 4)
     let currentStep = 1;

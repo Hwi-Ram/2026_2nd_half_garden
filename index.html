@@ -16,15 +16,13 @@
         
         .btn { padding: 12px 18px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
         .btn:hover { background-color: #0056b3; }
-        .btn-next { width: 100%; margin-top: 20px; background-color: #28a745; }
-        .btn-next:hover { background-color: #218838; }
 
         .result-box { display: none; margin-top: 10px; }
         .user-name { font-size: 1.2rem; font-weight: bold; color: #007bff; margin-bottom: 20px; text-align: center; }
         
         .timeline { position: relative; padding-left: 20px; border-left: 2px solid #e0e0e0; margin-left: 10px; }
-        .step { position: relative; margin-bottom: 20px; display: none; } /* 기본적으로 숨김 처리 */
-        .step.active { display: block; animation: fadeIn 0.4s ease-in-out; } /* 활성화되면 나타남 */
+        .step { position: relative; margin-bottom: 20px; display: none; }
+        .step.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         
         .step::before { content: ''; position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #007bff; }
         .step.destination::before { background: #28a745; width: 12px; height: 12px; left: -27px; }
@@ -33,6 +31,9 @@
         .value { font-size: 1.1rem; font-weight: 600; color: #222; }
         .destination .value { color: #28a745; font-size: 1.2rem; }
         
+        .guide-banner { margin-top: 20px; padding: 14px; background-color: #e7f3ff; border-radius: 8px; border-left: 4px solid #007bff; color: #004085; font-size: 0.9rem; text-align: center; line-height: 1.4; }
+        .guide-banner.completed { background-color: #d4edda; border-left-color: #28a745; color: #155724; }
+
         .error-msg { color: #dc3545; text-align: center; font-size: 0.95rem; display: none; margin-top: 10px; }
 
         @keyframes fadeIn {
@@ -47,7 +48,7 @@
     <h1>🚩 나의 목적지 찾기 🗺️</h1>
     
     <div class="input-group" id="searchArea">
-        <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 김태현)">
+        <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 나전원)">
         <button class="btn" onclick="startRoute()">조회</button>
     </div>
 
@@ -75,35 +76,88 @@
             </div>
         </div>
 
-        <button id="nextBtn" class="btn btn-next" onclick="showNextStep()">다음 장소 확인하기 👉</button>
+        <div id="guideBanner" class="guide-banner">
+            📍 장소에 도착하여 미션을 수행한 후<br><strong>현장의 완료 QR 코드</strong>를 스캔해 주세요!
+        </div>
     </div>
 </div>
 
 <script>
-    // 1. 특정 참가자 지정 데이터
+    // 1. 특정 참가자 맞춤 설정 (필요시 작성)
+    // - 전체 고정 예시: "김태현": { p1: "...", p2: "...", p3: "...", dest: "..." }
+    // - 목적지만 고정하고 경유지는 무작위로 받으려면: "지민철": { dest: "목적지 B" }
     const fixedParticipants = {
-        "김태현": { p1: "원하는 멘트", p2: "수정하고싶은 글자", p3: "추가할 장소", dest: "말해주쇼" }
+        "테스트": { p1: "첫번째", p2: "두번째", p3: "세번째", dest: "목적지" },
+        "박진아": { dest: "목적지 A" },
+        "유태영": { dest: "목적지 A" },
+        "김소희": { dest: "목적지 A" },
+        "이범교": { dest: "목적지 A" },
+        "배민선": { dest: "목적지 A" },
+        "윤휘람": { dest: "목적지 B" },
+        "이동구": { dest: "목적지 B" },
+        "이은서": { dest: "목적지 B" },
+        "공소라": { dest: "목적지 B" },
+        "박예찬": { dest: "목적지 B" },
+        "안하원": { dest: "목적지 B" },
+        "김소정": { dest: "목적지 C" },
+        "석성훈": { dest: "목적지 C" },
+        "윤예진": { dest: "목적지 C" },
+        "홍지원": { dest: "목적지 C" },
+        "배민우": { dest: "목적지 C" },
+        "김혜민": { dest: "목적지 D" },
+        "이시진": { dest: "목적지 D" },
+        "원유진": { dest: "목적지 D" },
+        "조민희": { dest: "목적지 D" },
+        "성민석": { dest: "목적지 D" },
+        "조건희": { dest: "목적지 D" }
+    
     };
 
-    // 2. 무작위 배정용 전체 경유지 목록
-    const waypointsPool = [
-        "예루살렘 성전", "바울성전", "안디옥 성전", 
-        "대운동장", "1청년부실", "2청년부실"
+    // 2. 전체 목적지 목록 (총 4개)
+    const destinationsPool = [
+        "목적지 A",
+        "목적지 B",
+        "목적지 C",
+        "목적지 D"
     ];
 
-    // 3. 공통 최종 목적지
-    const finalDestination = "베들레헴 성전";
-
-    // 현재 열람 중인 단계 상태 값 (1 ~ 4)
-    let currentStep = 1;
+    // 3. 무작위 배정용 전체 경유지 후보 목록
+    const waypointsPool = [
+        "예루살렘 성전", "안디옥 성전", "수양관식당", 
+        "대운동장", "바울성전"
+    ];
+const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 (밀리초 단위)
 
     function getRandomItems(arr, count) {
         const shuffled = [...arr].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, count);
     }
 
-    function startRoute() {
-        const name = document.getElementById("nameInput").value.trim();
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    function checkAndClearExpiredData(name) {
+        const savedTime = localStorage.getItem(`saved_time_${name}`); // 최초 접속 후 경로조회 시간
+        const now = new Date().getTime();
+
+        if (savedTime && (now - parseInt(savedTime) > EXPIRE_TIME)) { // 24시간 지났으면 기존 경로와 단계 초기화
+            localStorage.removeItem(`route_data_${name}`);
+            localStorage.removeItem(`max_step_${name}`);
+            localStorage.removeItem(`saved_time_${name}`);
+            
+            if (localStorage.getItem("route_user_name") === name) {
+                localStorage.removeItem("route_user_name");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    function startRoute(providedName = null) {
+        const nameInput = document.getElementById("nameInput");
+        const name = providedName || nameInput.value.trim();
         const resultBox = document.getElementById("resultBox");
         const errorMsg = document.getElementById("errorMsg");
 
@@ -114,59 +168,117 @@
             return;
         }
 
-        let routeData = {};
-
-        if (fixedParticipants[name]) {
-            routeData = fixedParticipants[name];
-        } else {
-            const randomWaypoints = getRandomItems(waypointsPool, 3);
-            routeData = {
-                p1: randomWaypoints[0],
-                p2: randomWaypoints[1],
-                p3: randomWaypoints[2],
-                dest: finalDestination
-            };
+        const isExpired = checkAndClearExpiredData(name);
+        const now = new Date().getTime();
+        
+        if (!localStorage.getItem(`saved_time_${name}`) || isExpired) {
+            localStorage.setItem(`saved_time_${name}`, now);
         }
 
-        // 데이터 채우기
+        localStorage.setItem("route_user_name", name);
+        nameInput.value = name;
+
+        let routeData = {};
+
+        // 고정 데이터 및 무작위 경로 할당
+        const savedRoute = localStorage.getItem(`route_data_${name}`);
+        if (savedRoute) {
+            routeData = JSON.parse(savedRoute);
+        } else {
+            let assignedDest = "";
+            let assignedP1 = "", assignedP2 = "", assignedP3 = "";
+
+            // 1) 목적지 결정
+            if (fixedParticipants[name] && fixedParticipants[name].dest) {
+                assignedDest = fixedParticipants[name].dest;
+            } else {
+                // 4개 목적지 중 1곳 무작위 추출
+                assignedDest = getRandomItems(destinationsPool, 1)[0];
+            }
+
+            // 2) 경유지 결정
+            if (fixedParticipants[name] && fixedParticipants[name].p1) {
+                assignedP1 = fixedParticipants[name].p1;
+                assignedP2 = fixedParticipants[name].p2;
+                assignedP3 = fixedParticipants[name].p3;
+            } else {
+                // 목적지와 중복되는 경유지가 없도록 제외 처리 후 3곳 무작위 추출
+                const availableWaypoints = waypointsPool.filter(item => item !== assignedDest);
+                const randomWaypoints = getRandomItems(availableWaypoints, 3);
+                
+                assignedP1 = randomWaypoints[0];
+                assignedP2 = randomWaypoints[1];
+                assignedP3 = randomWaypoints[2];
+            }
+
+            routeData = {
+                p1: assignedP1,
+                p2: assignedP2,
+                p3: assignedP3,
+                dest: assignedDest
+            };
+
+            localStorage.setItem(`route_data_${name}`, JSON.stringify(routeData));
+        }
+
+        // 화면 텍스트 연결
         document.getElementById("userNameDisplay").textContent = `[ ${name} ] 님의 이동 경로`;
         document.getElementById("p1").textContent = routeData.p1;
         document.getElementById("p2").textContent = routeData.p2;
         document.getElementById("p3").textContent = routeData.p3;
         document.getElementById("dest").textContent = routeData.dest;
 
-        // 단계 초기화 (모든 스텝 숨기고 1단계만 표시)
-        currentStep = 1;
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById(`step${i}`).classList.remove("active");
-        }
-        document.getElementById("step1").classList.add("active");
+        // 최고 진행 단계 계산 및 저장
+        const stepParam = parseInt(getQueryParam("step")) || 1;
+        const currentScanStep = Math.min(Math.max(stepParam, 1), 4);
+        const savedMaxStep = parseInt(localStorage.getItem(`max_step_${name}`)) || 1;
 
-        // 버튼 상태 초기화
-        const nextBtn = document.getElementById("nextBtn");
-        nextBtn.textContent = "다음 장소 확인하기 👉";
-        nextBtn.style.display = "block";
+        const activeStep = Math.max(currentScanStep, savedMaxStep);
+        localStorage.setItem(`max_step_${name}`, activeStep);
+
+        // UI 스텝 표시
+        for (let i = 1; i <= 4; i++) {
+            const stepEl = document.getElementById(`step${i}`);
+            if (i <= activeStep) {
+                stepEl.classList.add("active");
+            } else {
+                stepEl.classList.remove("active");
+            }
+        }
+
+        // 하단 안내 문구 제어
+        const guideBanner = document.getElementById("guideBanner");
+        if (activeStep === 4) {
+            guideBanner.className = "guide-banner completed";
+            guideBanner.innerHTML = "🎉 <strong>모든 경유지를 통과했습니다!</strong><br>최종 목적지로 집결해 주세요.";
+        } else {
+            guideBanner.className = "guide-banner";
+            guideBanner.innerHTML = `📍 <strong>${activeStep}차 경유지</strong>에 도착하여 미션을 완료한 후<br>현장의 QR 코드를 스캔하면 다음 장소가 열립니다!`;
+        }
 
         errorMsg.style.display = "none";
         resultBox.style.display = "block";
     }
 
-    function showNextStep() {
-        if (currentStep < 4) {
-            currentStep++;
-            document.getElementById(`step${currentStep}`).classList.add("active");
+    // 페이지 로드 시 자동 실행
+    window.addEventListener("DOMContentLoaded", () => {
+        const savedName = localStorage.getItem("route_user_name");
+        const stepParam = getQueryParam("step");
 
-            // 마지막 목적지 단계에 도달했을 때
-            if (currentStep === 4) {
-                const nextBtn = document.getElementById("nextBtn");
-                nextBtn.textContent = "🎉 목적지 도착!";
-                nextBtn.style.backgroundColor = "#6c757d";
-                nextBtn.onclick = null; // 더 이상 클릭 안 되게 처리
+        if (savedName) {
+            const isExpired = checkAndClearExpiredData(savedName);
+            if (!isExpired) {
+                startRoute(savedName);
+            } else {
+                document.getElementById("errorMsg").textContent = "이전 접속 후 24시간이 지나 데이터가 초기화되었습니다. 다시 조회해 주세요.";
+                document.getElementById("errorMsg").style.display = "block";
             }
+        } else if (stepParam) {
+            document.getElementById("errorMsg").textContent = "먼저 본인의 이름을 입력해 주세요.";
+            document.getElementById("errorMsg").style.display = "block";
         }
-    }
+    });
 
-    // 엔터키 지원
     document.getElementById("nameInput").addEventListener("keypress", function(e) {
         if (e.key === "Enter") startRoute();
     });

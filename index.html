@@ -80,10 +80,20 @@
         <div id="guideBanner" class="guide-banner">
             📍 지정된 장소에 도착하여 미션을 완료한 후<br><strong>현장의 QR 코드</strong>를 스캔해 주세요!
         </div>
+
+        <!-- 카메라/스캔 문제 처리 버튼 -->
+        <div class="manual-btn-wrapper">
+            <button type="button" class="manual-btn" onclick="openStaffAuth()">
+                📷 카메라/QR 스캔에 문제가 있나요? (스태프 확인)
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
+    // 운영용 관리자 비밀번호 (원하는 비밀번호로 변경하세요)
+    const ADMIN_PASSWORD = "1122";
+    
     // 사용자별 "최종 목적지" 지정 (중간 경유지는 아래 장소 목록에서 중복 없이 3개 랜덤 추출)
     const fixedDestinations = {
         "박진아": "농구골대",
@@ -259,6 +269,42 @@
 
         errorMsg.style.display = "none";
         resultBox.style.display = "block";
+    }
+    
+    // 관리자/스태프 강제 승인 처리 로직
+    function openStaffAuth() {
+        const savedName = localStorage.getItem("route_user_name");
+        if (!savedName) {
+            alert("먼저 이름을 입력하고 코스를 조회해 주세요.");
+            return;
+        }
+
+        let completedStep = parseInt(localStorage.getItem(`completed_step_${savedName}`)) || 0;
+        if (completedStep >= 4) {
+            alert("이미 모든 코스를 완료한 사용자입니다.");
+            return;
+        }
+
+        const routeData = JSON.parse(localStorage.getItem(`route_data_${savedName}`));
+        const currentTarget = routeData[completedStep]; // 현재 방문해야 할 장소
+
+        const inputPw = prompt(`[스태프 전용]\n현재 인증 단계: ${completedStep + 1}차 [${currentTarget}]\n\n관리자 비밀번호를 입력하세요:`);
+
+        if (inputPw === null) return; // 취소 누름
+
+        if (inputPw === ADMIN_PASSWORD) {
+            completedStep++;
+            localStorage.setItem(`completed_step_${savedName}`, completedStep);
+            
+            alert(`✅ [스태프 승인]\n[${currentTarget}] 단계가 강제 완료 처리되었습니다.`);
+            
+            // URL의 loc 파라미터 지우고 UI 새로고침
+            const urlWithoutParams = window.location.pathname;
+            window.history.replaceState({}, document.title, urlWithoutParams);
+            startRoute(savedName);
+        } else {
+            alert("❌ 비밀번호가 올바르지 않습니다.");
+        }
     }
 
     window.addEventListener("DOMContentLoaded", () => {

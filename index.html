@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>단계별 경유지 안내</title>
+    <title>개인별 스탬프/경유지 안내</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
         body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
@@ -33,6 +33,7 @@
         
         .guide-banner { margin-top: 20px; padding: 14px; background-color: #e7f3ff; border-radius: 8px; border-left: 4px solid #007bff; color: #004085; font-size: 0.9rem; text-align: center; line-height: 1.4; }
         .guide-banner.completed { background-color: #d4edda; border-left-color: #28a745; color: #155724; }
+        .guide-banner.warning { background-color: #fff3cd; border-left-color: #ffc107; color: #856404; }
 
         .error-msg { color: #dc3545; text-align: center; font-size: 0.95rem; display: none; margin-top: 10px; }
 
@@ -45,7 +46,7 @@
 <body>
 
 <div class="card">
-    <h1>🚩 나의 목적지 찾기 🗺️</h1>
+    <h1>🚩 개인별 코스 안내</h1>
     
     <div class="input-group" id="searchArea">
         <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 나전원)">
@@ -59,74 +60,62 @@
         
         <div class="timeline">
             <div id="step1" class="step">
-                <span class="label">1차 목적지</span>
+                <span class="label" id="lbl1">1차 장소</span>
                 <span id="p1" class="value"></span>
             </div>
             <div id="step2" class="step">
-                <span class="label">2차 목적지</span>
+                <span class="label" id="lbl2">2차 장소</span>
                 <span id="p2" class="value"></span>
             </div>
             <div id="step3" class="step">
-                <span class="label">3차 목적지</span>
+                <span class="label" id="lbl3">3차 장소</span>
                 <span id="p3" class="value"></span>
             </div>
             <div id="step4" class="step destination">
-                <span class="label">최종 목적지</span>
-                <span id="dest" class="value"></span>
+                <span class="label" id="lbl4">최종 목적지 (4차)</span>
+                <span id="p4" class="value"></span>
             </div>
         </div>
 
         <div id="guideBanner" class="guide-banner">
-            📍 장소에 도착하여 미션을 수행한 후<br><strong>현장의 완료 QR 코드</strong>를 스캔해 주세요!
+            📍 지정된 장소에 도착하여 미션을 완료한 후<br><strong>현장의 QR 코드</strong>를 스캔해 주세요!
         </div>
     </div>
 </div>
 
 <script>
-    // 1. 특정 참가자 맞춤 설정 (필요시 작성)
-    // - 전체 고정 예시: "김태현": { p1: "...", p2: "...", p3: "...", dest: "..." }
-    // - 목적지만 고정하고 경유지는 무작위로 받으려면: "지민철": { dest: "목적지 B" }
-    const fixedParticipants = {
-        "테스트": { p1: "첫번째", p2: "두번째", p3: "세번째", dest: "목적지" },
-        "박진아": { dest: "목적지 A" },
-        "유태영": { dest: "목적지 A" },
-        "김소희": { dest: "목적지 A" },
-        "이범교": { dest: "목적지 A" },
-        "배민선": { dest: "목적지 A" },
-        "윤휘람": { dest: "목적지 B" },
-        "이동구": { dest: "목적지 B" },
-        "이은서": { dest: "목적지 B" },
-        "공소라": { dest: "목적지 B" },
-        "박예찬": { dest: "목적지 B" },
-        "안하원": { dest: "목적지 B" },
-        "김소정": { dest: "목적지 C" },
-        "석성훈": { dest: "목적지 C" },
-        "윤예진": { dest: "목적지 C" },
-        "홍지원": { dest: "목적지 C" },
-        "배민우": { dest: "목적지 C" },
-        "김혜민": { dest: "목적지 D" },
-        "이시진": { dest: "목적지 D" },
-        "원유진": { dest: "목적지 D" },
-        "조민희": { dest: "목적지 D" },
-        "성민석": { dest: "목적지 D" },
-        "조건희": { dest: "목적지 D" }
-    
+    // 사용자별 "최종 목적지" 지정 (중간 경유지는 아래 장소 목록에서 중복 없이 3개 랜덤 추출)
+    const fixedDestinations = {
+        "박진아": "농구골대",
+        "유태영": "농구골대",
+        "김소희": "농구골대",
+        "이범교": "농구골대",
+        "배민선": "농구골대",
+        "윤휘람" : "음악당",
+        "이은서" : "음악당",
+        "이동구" : "음악당",
+        "공소라" : "음악당",
+        "박예찬" : "음악당",
+        "안하원" : "음악당",
+        "김소정": "침례장",
+        "석성훈": "침례장",
+        "윤예진": "침례장",
+        "홍지원": "침례장",
+        "배민우": "침례장",
+        "김혜민": "로비",
+        "이시": "로비",
+        "원유진": "로비",
+        "조민희": "로비",
+        "성민석": "로비",
+        "조건희": "로비"
     };
 
-    // 2. 전체 목적지 목록 (총 4개)
-    const destinationsPool = [
-        "목적지 A",
-        "목적지 B",
-        "목적지 C",
-        "목적지 D"
+    // 경유지 및 목적지로 활용할 전체 장소 목록
+    const allLocationsPool = [
+        "음악당", "농구골대", "침례장", "로비"
     ];
 
-    // 3. 무작위 배정용 전체 경유지 후보 목록
-    const waypointsPool = [
-        "예루살렘", "안디옥", "수양관식당", 
-        "대운동장", "바울"
-    ];
-const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 (밀리초 단위)
+    const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 후 초기화
 
     function getRandomItems(arr, count) {
         const shuffled = [...arr].sort(() => 0.5 - Math.random());
@@ -139,14 +128,13 @@ const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 (밀리초 단위)
     }
 
     function checkAndClearExpiredData(name) {
-        const savedTime = localStorage.getItem(`saved_time_${name}`); // 최초 접속 후 경로조회 시간
+        const savedTime = localStorage.getItem(`saved_time_${name}`);
         const now = new Date().getTime();
 
-        if (savedTime && (now - parseInt(savedTime) > EXPIRE_TIME)) { // 24시간 지났으면 기존 경로와 단계 초기화
+        if (savedTime && (now - parseInt(savedTime) > EXPIRE_TIME)) {
             localStorage.removeItem(`route_data_${name}`);
-            localStorage.removeItem(`max_step_${name}`);
+            localStorage.removeItem(`completed_step_${name}`);
             localStorage.removeItem(`saved_time_${name}`);
-            
             if (localStorage.getItem("route_user_name") === name) {
                 localStorage.removeItem("route_user_name");
             }
@@ -178,126 +166,115 @@ const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 (밀리초 단위)
         localStorage.setItem("route_user_name", name);
         nameInput.value = name;
 
-        //경로 설정
-        let routeData = {};
-
-        // 고정 데이터 및 무작위 경로 할당
+        // 코스 생성/불러오기
+        let routeData = [];
         const savedRoute = localStorage.getItem(`route_data_${name}`);
         if (savedRoute) {
             routeData = JSON.parse(savedRoute);
         } else {
-            let assignedDest = "";
-            let assignedP1 = "", assignedP2 = "", assignedP3 = "";
+            let finalDest = "";
 
-            // 1) 목적지 결정
-            if (fixedParticipants[name] && fixedParticipants[name].dest) {
-                assignedDest = fixedParticipants[name].dest;
+            // 1. 최종 목적지 결정 (명단에 있으면 고정값, 없으면 전체 장소 중 랜덤 1개)
+            if (fixedDestinations[name]) {
+                finalDest = fixedDestinations[name];
             } else {
-                // 4개 목적지 중 1곳 무작위 추출
-                assignedDest = getRandomItems(destinationsPool, 1)[0];
+                finalDest = getRandomItems(allLocationsPool, 1)[0];
             }
 
-            // 2) 경유지 결정
-            if (fixedParticipants[name] && fixedParticipants[name].p1) {
-                assignedP1 = fixedParticipants[name].p1;
-                assignedP2 = fixedParticipants[name].p2;
-                assignedP3 = fixedParticipants[name].p3;
-            } else {
-                // 목적지와 중복되는 경유지가 없도록 제외 처리 후 3곳 무작위 추출
-                const availableWaypoints = waypointsPool.filter(item => item !== assignedDest);
-                const randomWaypoints = getRandomItems(availableWaypoints, 3);
-                
-                assignedP1 = randomWaypoints[0];
-                assignedP2 = randomWaypoints[1];
-                assignedP3 = randomWaypoints[2];
-            }
+            // 2. 최종 목적지를 제외한 후보군에서 중간 경유지 3개 추출
+            const availableWaypoints = allLocationsPool.filter(loc => loc !== finalDest);
+            const waypoints = getRandomItems(availableWaypoints, 3);
 
-            routeData = {
-                p1: assignedP1,
-                p2: assignedP2,
-                p3: assignedP3,
-                dest: assignedDest
-            };
-
+            // 3. [1차, 2차, 3차, 최종 목적지] 배열 완성
+            routeData = [...waypoints, finalDest];
             localStorage.setItem(`route_data_${name}`, JSON.stringify(routeData));
         }
 
-        // 화면 텍스트 연결
-        document.getElementById("userNameDisplay").textContent = `[ ${name} ] 님의 이동 경로`;
-        document.getElementById("p1").textContent = routeData.p1;
-        document.getElementById("p2").textContent = routeData.p2;
-        document.getElementById("p3").textContent = routeData.p3;
-        document.getElementById("dest").textContent = routeData.dest;
+        document.getElementById("userNameDisplay").textContent = `[ ${name} ] 님의 이동 코스`;
+        document.getElementById("p1").textContent = routeData[0];
+        document.getElementById("p2").textContent = routeData[1];
+        document.getElementById("p3").textContent = routeData[2];
+        document.getElementById("p4").textContent = routeData[3];
 
-      // 장소 기반 QR 인증 검증 로직
+        // QR 인증 로직
         const scannedLocation = getQueryParam("loc");
-        let activeStep = parseInt(localStorage.getItem(`max_step_${name}`)) || 1;
+        // completedStep: 완료한 단계 수 (0 = 시작 전, 1 = 1차 완료, 4 = 전체 완료)
+        let completedStep = parseInt(localStorage.getItem(`completed_step_${name}`)) || 0;
         let statusMessage = "";
-        let bannerStatus = ""; // default, completed, warning
+        let bannerStatus = "";
 
         if (scannedLocation) {
-            if (activeStep === 1 && scannedLocation === routeData.p1) {
-                activeStep = 2;
-                statusMessage = `✅ <strong>1차 경유지 [${routeData.p1}] 인증 완료!</strong><br>다음 목적지(2차)가 열렸습니다.`;
-            } else if (activeStep === 2 && scannedLocation === routeData.p2) {
-                activeStep = 3;
-                statusMessage = `✅ <strong>2차 경유지 [${routeData.p2}] 인증 완료!</strong><br>다음 목적지(3차)가 열렸습니다.`;
-            } else if (activeStep === 3 && scannedLocation === routeData.p3) {
-                activeStep = 4;
-                statusMessage = `✅ <strong>3차 경유지 [${routeData.p3}] 인증 완료!</strong><br>최종 목적지가 열렸습니다.`;
-            } else {
-                // 잘못된 장소이거나 이미 인증한 장소인 경우
-                if (scannedLocation === routeData.p1 || scannedLocation === routeData.p2 || scannedLocation === routeData.p3) {
-                    statusMessage = `ℹ️ 이미 인증을 완료한 장소 [${scannedLocation}] 입니다.`;
-                    bannerStatus = "warning";
+            if (completedStep < 4) {
+                const targetLocation = routeData[completedStep]; // 이번에 방문해야 할 장소
+
+                if (scannedLocation === targetLocation) {
+                    completedStep++;
+                    localStorage.setItem(`completed_step_${name}`, completedStep);
+
+                    if (completedStep === 4) {
+                        statusMessage = `🎉 <strong>최종 목적지 [${scannedLocation}] 도착 완료!</strong><br>모든 코스를 마쳤습니다. 수고하셨습니다!`;
+                        bannerStatus = "completed";
+                    } else {
+                        statusMessage = `✅ <strong>[${scannedLocation}] 인증 완료!</strong><br>다음 장소(${completedStep + 1}차)가 열렸습니다.`;
+                    }
                 } else {
-                    const nextTarget = activeStep === 1 ? routeData.p1 : (activeStep === 2 ? routeData.p2 : routeData.p3);
-                    statusMessage = `⚠️ 순서에 맞지 않는 장소입니다.<br>현재 찾아가셔야 할 곳은 <strong>[${nextTarget}]</strong> 입니다.`;
-                    bannerStatus = "warning";
+                    // 이미 완료한 장소 스캔 시
+                    const alreadyDone = routeData.slice(0, completedStep).includes(scannedLocation);
+                    if (alreadyDone) {
+                        statusMessage = `ℹ️ 이미 인증을 마친 장소 [${scannedLocation}] 입니다.`;
+                        bannerStatus = "warning";
+                    } else {
+                        statusMessage = `⚠️ 순서가 다릅니다!<br>현재 이동할 곳은 <strong>[${targetLocation}]</strong> 입니다.`;
+                        bannerStatus = "warning";
+                    }
                 }
+            } else {
+                statusMessage = `🎉 이미 모든 코스 인증을 완료했습니다!`;
+                bannerStatus = "completed";
             }
-            localStorage.setItem(`max_step_${name}`, activeStep);
         }
 
-        // UI 스텝 표시
+        // 화면 UI 갱신
+        // (현재 진행해야 하는 단계까지 오픈 + 다음 목적지까지 미리 노출)
+        const activeStepLimit = Math.min(completedStep + 1, 4);
         for (let i = 1; i <= 4; i++) {
             const stepEl = document.getElementById(`step${i}`);
-            if (i <= activeStep) {
+            if (i <= activeStepLimit) {
                 stepEl.classList.add("active");
             } else {
                 stepEl.classList.remove("active");
             }
         }
 
-        // 하단 안내 문구 제어
+        // 배너 문구 설정
         const guideBanner = document.getElementById("guideBanner");
-        if (activeStep === 4) {
+        if (completedStep === 4) {
             guideBanner.className = "guide-banner completed";
-            guideBanner.innerHTML = "🎉 <strong>모든 경유지를 통과했습니다!</strong><br>최종 목적지로 집결해 주세요.";
+            guideBanner.innerHTML = statusMessage || "🎉 <strong>모든 코스를 완주했습니다!</strong>";
         } else {
-            guideBanner.className = "guide-banner";
-            guideBanner.innerHTML = `📍 <strong>${activeStep}차 경유지</strong>에 도착하여 미션을 완료한 후<br>현장의 QR 코드를 스캔하면 다음 장소가 열립니다!`;
+            guideBanner.className = bannerStatus ? `guide-banner ${bannerStatus}` : "guide-banner";
+            const nextPlace = routeData[completedStep];
+            guideBanner.innerHTML = statusMessage || `📍 <strong>[${nextPlace}]</strong>에 도착하여 QR 코드를 스캔해 주세요!`;
         }
 
         errorMsg.style.display = "none";
         resultBox.style.display = "block";
     }
 
-    // 페이지 로드 시 자동 실행
     window.addEventListener("DOMContentLoaded", () => {
         const savedName = localStorage.getItem("route_user_name");
-        const stepParam = getQueryParam("step");
+        const locParam = getQueryParam("loc");
 
         if (savedName) {
             const isExpired = checkAndClearExpiredData(savedName);
             if (!isExpired) {
                 startRoute(savedName);
             } else {
-                document.getElementById("errorMsg").textContent = "이전 접속 후 24시간이 지나 데이터가 초기화되었습니다. 다시 조회해 주세요.";
+                document.getElementById("errorMsg").textContent = "이전 접속 후 24시간이 지나 초기화되었습니다. 다시 이름을 입력해 주세요.";
                 document.getElementById("errorMsg").style.display = "block";
             }
-        } else if (stepParam) {
-            document.getElementById("errorMsg").textContent = "먼저 본인의 이름을 입력해 주세요.";
+        } else if (locParam) {
+            document.getElementById("errorMsg").textContent = "먼저 본인의 이름을 입력하여 코스를 조회해 주세요.";
             document.getElementById("errorMsg").style.display = "block";
         }
     });

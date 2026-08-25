@@ -178,6 +178,7 @@ const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 (밀리초 단위)
         localStorage.setItem("route_user_name", name);
         nameInput.value = name;
 
+        //경로 설정
         let routeData = {};
 
         // 고정 데이터 및 무작위 경로 할당
@@ -228,13 +229,35 @@ const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 (밀리초 단위)
         document.getElementById("p3").textContent = routeData.p3;
         document.getElementById("dest").textContent = routeData.dest;
 
-        // 최고 진행 단계 계산 및 저장
-        const stepParam = parseInt(getQueryParam("step")) || 1;
-        const currentScanStep = Math.min(Math.max(stepParam, 1), 4);
-        const savedMaxStep = parseInt(localStorage.getItem(`max_step_${name}`)) || 1;
+      // 장소 기반 QR 인증 검증 로직
+        const scannedLocation = getQueryParam("loc");
+        let activeStep = parseInt(localStorage.getItem(`max_step_${name}`)) || 1;
+        let statusMessage = "";
+        let bannerStatus = ""; // default, completed, warning
 
-        const activeStep = Math.max(currentScanStep, savedMaxStep);
-        localStorage.setItem(`max_step_${name}`, activeStep);
+        if (scannedLocation) {
+            if (activeStep === 1 && scannedLocation === routeData.p1) {
+                activeStep = 2;
+                statusMessage = `✅ <strong>1차 경유지 [${routeData.p1}] 인증 완료!</strong><br>다음 목적지(2차)가 열렸습니다.`;
+            } else if (activeStep === 2 && scannedLocation === routeData.p2) {
+                activeStep = 3;
+                statusMessage = `✅ <strong>2차 경유지 [${routeData.p2}] 인증 완료!</strong><br>다음 목적지(3차)가 열렸습니다.`;
+            } else if (activeStep === 3 && scannedLocation === routeData.p3) {
+                activeStep = 4;
+                statusMessage = `✅ <strong>3차 경유지 [${routeData.p3}] 인증 완료!</strong><br>최종 목적지가 열렸습니다.`;
+            } else {
+                // 잘못된 장소이거나 이미 인증한 장소인 경우
+                if (scannedLocation === routeData.p1 || scannedLocation === routeData.p2 || scannedLocation === routeData.p3) {
+                    statusMessage = `ℹ️ 이미 인증을 완료한 장소 [${scannedLocation}] 입니다.`;
+                    bannerStatus = "warning";
+                } else {
+                    const nextTarget = activeStep === 1 ? routeData.p1 : (activeStep === 2 ? routeData.p2 : routeData.p3);
+                    statusMessage = `⚠️ 순서에 맞지 않는 장소입니다.<br>현재 찾아가셔야 할 곳은 <strong>[${nextTarget}]</strong> 입니다.`;
+                    bannerStatus = "warning";
+                }
+            }
+            localStorage.setItem(`max_step_${name}`, activeStep);
+        }
 
         // UI 스텝 표시
         for (let i = 1; i <= 4; i++) {

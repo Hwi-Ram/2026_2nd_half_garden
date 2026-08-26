@@ -5,16 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>개인별 스탬프/경유지 안내</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
-        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: #ffffff; width: 100%; max-width: 420px; padding: 30px 24px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-        h1 { font-size: 1.4rem; color: #111; margin-bottom: 20px; text-align: center; }
-        
-        .input-group { display: flex; gap: 8px; margin-bottom: 24px; }
-        input { flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; }
+        * { box-sizing: border-box; 
+           margin: 0; padding: 0; 
+           font-family: 'Pretendard', -apple-system, sans-serif; 
+          }
+        body { background-color: #f4f6f9;
+              display: flex;
+              justify-content: center;
+              align-items: center; 
+              min-height: 100vh;
+              padding: 20px; }
+        .card { background: #ffffff;
+               width: 100%;
+               max-width: 420px; 
+               padding: 24px 16px 20px;
+               border-radius: 16px;
+               box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+              }
+        h1 { font-size: 1.4rem; 
+            color: #111;
+            margin-bottom: 20px; 
+            text-align: center; 
+           }
+
+        /* 입력창 영역이 카드를 넘지 않도록 너비 100% 및 내부 여백 조절 */
+        .input-group { display: flex; 
+                      gap: 8px; 
+                      margin-bottom: 24px; 
+                      width: 100%; }
+        input { flex: 1; 
+               min-width: 0; 
+               padding: 12px 16px; 
+               border: 1px solid #ddd; 
+               border-radius: 8px; font-size: 1rem; 
+               outline: none; 
+              }
         input:focus { border-color: #007bff; }
         
-        .btn { padding: 12px 18px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .btn { 
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            flex-shrink: 0; /* 버튼 크기 줄어듦 방지 */
+        }
         .btn:hover { background-color: #0056b3; }
 
         .result-box { display: none; margin-top: 10px; }
@@ -77,7 +119,7 @@
     
     <div class="input-group" id="searchArea">
         <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 나전원)">
-        <button class="btn" onclick="startRoute()">조회</button>
+        <button class="btn" onclick="startRoute()" aria-label="조회">🔍</button>
     </div>
 
     <div id="errorMsg" class="error-msg">이름을 입력해 주세요.</div>

@@ -37,6 +37,33 @@
 
         .error-msg { color: #dc3545; text-align: center; font-size: 0.95rem; display: none; margin-top: 10px; }
 
+// 예외 처리 버튼 스타일 
+        // ㄹㄹㄹㄹㄹㄹ
+        .footer-help {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #e9ecef;
+            text-align: center;
+        }
+        .manual-btn {
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+            color: #6c757d;
+            font-size: 0.8rem;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .manual-btn:hover {
+            background: #e9ecef;
+            color: #495057;
+            border-color: #cbd5e1;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -72,7 +99,7 @@
                 <span id="p3" class="value"></span>
             </div>
             <div id="step4" class="step destination">
-                <span class="label" id="lbl4">최종 목적지 (4차)</span>
+                <span class="label" id="lbl4">최종 목적지</span>
                 <span id="p4" class="value"></span>
             </div>
         </div>
@@ -82,9 +109,9 @@
         </div>
 
         <!-- 카메라/스캔 문제 처리 버튼 -->
-        <div class="manual-btn-wrapper">
+        <div class="footer-help">
             <button type="button" class="manual-btn" onclick="openStaffAuth()">
-                📷 카메라/QR 스캔에 문제가 있나요? (스태프 확인)
+                <span>❓</span> 스캔 오류 발생 시 (스태프 인증)
             </button>
         </div>
     </div>
@@ -120,7 +147,7 @@
         "조건희": "로비"
     };
 
-    // 경유지 및 목적지로 활용할 전체 장소 목록
+    // 경유지 및 목적지 풀
     const allLocationsPool = [
         "음악당", "농구골대", "침례장", "로비"
     ];
@@ -176,7 +203,7 @@
         localStorage.setItem("route_user_name", name);
         nameInput.value = name;
 
-        // 코스 생성/불러오기
+        // 코스 생성 로직
         let routeData = [];
         const savedRoute = localStorage.getItem(`route_data_${name}`);
         if (savedRoute) {

@@ -219,6 +219,14 @@
         "음악당", "농구골대", "침례장", "로비"
     ];
 
+    // 스캔, 로직용 명칭 <-> 화면 표시용 상세 주소 매핑
+    const locationDetails = {
+        "음악당" : "바울성전 앞 음악당",
+        "농구골대" : "대운동장 옆 농구골대,벤치",
+        "침례장" : "대성전 옆 침례장",
+        "로비" : "예루살렘,베들레헴 성전 앞 로비"
+    }
+
     const EXPIRE_TIME = 24 * 60 * 60 * 1000; // 24시간 후 초기화
 
     function getRandomItems(arr, count) {
@@ -295,10 +303,10 @@
         }
 
         document.getElementById("userNameDisplay").textContent = `[ ${name} ] 님의 이동 코스`;
-        document.getElementById("p1").textContent = routeData[0];
-        document.getElementById("p2").textContent = routeData[1];
-        document.getElementById("p3").textContent = routeData[2];
-        document.getElementById("p4").textContent = routeData[3];
+        document.getElementById("p1").textContent = locationDetails[routeData[0]] || routeData[0];
+        document.getElementById("p2").textContent = locationDetails[routeData[1]] || routeData[1];
+        document.getElementById("p3").textContent = locationDetails[routeData[2]] || routeData[2];
+        document.getElementById("p4").textContent = locationDetails[routeData[3]] || routeData[3];
 
         // QR 인증 로직
         const scannedLocation = getQueryParam("loc");
@@ -358,7 +366,8 @@
         } else {
             guideBanner.className = bannerStatus ? `guide-banner ${bannerStatus}` : "guide-banner";
             const nextPlace = routeData[completedStep];
-            guideBanner.innerHTML = statusMessage || `📍 <strong>[${nextPlace}]</strong>에 도착하여 QR 코드를 스캔해 주세요!`;
+            const nextPlaceDetail = locationDetails[nextPlace] || nextPlace;
+            guideBanner.innerHTML = statusMessage || `📍 <strong>[${nextPlaceDetail}]</strong>에 도착하여 QR 코드를 스캔해 주세요!`;
         }
 
         errorMsg.style.display = "none";
@@ -381,8 +390,9 @@
 
         const routeData = JSON.parse(localStorage.getItem(`route_data_${savedName}`));
         const currentTarget = routeData[completedStep]; // 현재 방문해야 할 장소
+        const currentTargetDetail = locationDetails[currentTarget] || currentTarget;
 
-        const inputPw = prompt(`[스태프 전용]\n현재 인증 단계: ${completedStep + 1}차 [${currentTarget}]\n\n관리자 비밀번호를 입력하세요:`);
+        const inputPw = prompt(`[스태프 전용]\n현재 인증 단계: ${completedStep + 1}차 [${currentTargetDetail}]\n\n관리자 비밀번호를 입력하세요:`);
 
         if (inputPw === null) return; // 취소 누름
 

@@ -174,7 +174,7 @@
 <body>
 
 <div class="card">
-    <h1>🚩 개인별 코스 안내</h1>
+    <h1>🚩 구역장님 어디세이? 🗺️</h1>
     
     <div class="input-group" id="searchArea">
         <input type="text" id="nameInput" placeholder="이름을 입력하세요 (예: 나전원)">
@@ -434,7 +434,7 @@
             completedStep++;
             localStorage.setItem(`completed_step_${savedName}`, completedStep);
             
-            alert(`✅ [스태프 승인]\n[${currentTarget}] 단계가 강제 완료 처리되었습니다.`);
+            alert(`✅ [스태프 승인]\n[${currentTarget}] 단계가 완료 처리되었습니다.`);
             
             // URL의 loc 파라미터 지우고 UI 새로고침
             const urlWithoutParams = window.location.pathname;

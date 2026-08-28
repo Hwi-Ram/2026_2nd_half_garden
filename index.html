@@ -82,7 +82,7 @@
         }
         
         h1 { font-size: 1.4rem; 
-            color: #111;
+            color: #1C2A23;
             margin-bottom: 20px; 
             text-align: center; 
            }
@@ -108,15 +108,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #007bff; 
-            color: white; 
+            background-color: #2d4a3e; 
+            color: #ffffff; 
             border: none; 
             border-radius: 8px; 
             font-size: 1.1rem; 
             cursor: pointer; 
             flex-shrink: 0; /* 버튼 크기 줄어듦 방지 */
         }
-        .btn:hover { background-color: #0056b3; }
+        .btn:hover { background-color: #1e332a; }
 
         .result-box { display: none; margin-top: 10px; }
         .user-name { font-size: 1.2rem; font-weight: bold; color: #007bff; margin-bottom: 20px; text-align: center; }
@@ -125,15 +125,15 @@
         .step { position: relative; margin-bottom: 20px; display: none; }
         .step.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         
-        .step::before { content: ''; position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #007bff; }
-        .step.destination::before { background: #28a745; width: 12px; height: 12px; left: -27px; }
+        .step::before { content: ''; position: absolute; left: -26px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: #2d4a3e; }
+        .step.destination::before { background: #d4a373; width: 12px; height: 12px; left: -27px; }
         
-        .label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 2px; }
-        .value { font-size: 1.1rem; font-weight: 600; color: #222; }
-        .destination .value { color: #28a745; font-size: 1.2rem; }
+        .label { font-size: 0.8rem; color: #5c7065; display: block; margin-bottom: 2px; }
+        .value { font-size: 1.1rem; font-weight: 600; color: #1c2a23; }
+        .destination .value { color: #d4a373; font-size: 1.2rem; }
         
-        .guide-banner { margin-top: 20px; padding: 14px; background-color: #e7f3ff; border-radius: 8px; border-left: 4px solid #007bff; color: #004085; font-size: 0.9rem; text-align: center; line-height: 1.4; }
-        .guide-banner.completed { background-color: #d4edda; border-left-color: #28a745; color: #155724; }
+        .guide-banner { margin-top: 20px; padding: 14px; background-color: #ebf2ee; border-radius: 8px; border-left: 4px solid #2d4a3e; color: #1c2a23; font-size: 0.9rem; text-align: center; line-height: 1.4; }
+        .guide-banner.completed { background-color: #f7eedd; border-left-color: #d4a373; color: #5c4010; }
         .guide-banner.warning { background-color: #fff3cd; border-left-color: #ffc107; color: #856404; }
 
         .error-msg { color: #dc3545; text-align: center; font-size: 0.95rem; display: none; margin-top: 10px; }

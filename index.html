@@ -396,7 +396,7 @@
         const guideBanner = document.getElementById("guideBanner");
         if (completedStep === 4) {
             guideBanner.className = "guide-banner completed";
-            guideBanner.innerHTML = statusMessage || "🎉 <strong>모든 코스를 완주했습니다!</strong>";
+            guideBanner.innerHTML = statusMessage || "🎉 <strong>새로운 구역장님과 인사를 나누고 2라운드 서바이벌 물놀이 프로그램을 준비하세요!</strong>🔫";
         } else {
             guideBanner.className = bannerStatus ? `guide-banner ${bannerStatus}` : "guide-banner";
             const nextPlace = routeData[completedStep];
